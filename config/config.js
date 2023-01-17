@@ -8,7 +8,7 @@ const config = {
         useUnifiedTopology: true
       },
     saltRounds:10,
-    db: 'mongodb+srv://kyawzawlwin6394:XZ90J74EVci26GAd@cluster0.85ozwwv.mongodb.net/?retryWrites=true&w=majority',
+    db: '',
     root:rootPath,
     routes: "D:/work/2023/music-streaming-server/app/routes/*.js",
     attachmentUrl:'./uploads/music-streaming'
