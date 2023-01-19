@@ -3,7 +3,7 @@ const path = require('path');
 const config = require('../../config/config');
 
   
-const storage = multer.diskStorage({
+const storage = multer.memoryStorage({
     destination: function(req, file, cb) {
         cb(null, config.attachmentUrl);
     },

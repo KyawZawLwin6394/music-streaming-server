@@ -8,7 +8,8 @@ module.exports = (app) => {
 
     app.route('/track')
         .post(multiUpload.single('track'), erHandler(track.uploadTrack))
-        .get(erHandler( track.getTrack))
+    
+    app.route('/track/:trackID').get(erHandler( track.getTrack))
 };
 
 

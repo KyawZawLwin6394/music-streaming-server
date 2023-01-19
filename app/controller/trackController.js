@@ -1,7 +1,9 @@
 "use strict";
 const Track = require("../models/track");
-const Util = require("../lib/util");
-const multer = require("multer");
+const { Readable } = require("stream");
+const ObjectID = require("mongodb").ObjectID;
+const mongodb = require("mongodb");
+const { default: mongoose } = require("mongoose");
 
 exports.getTrack = async (req, res) => {
   const result = Track.findById(req.body.id);
@@ -44,14 +46,13 @@ exports.getTracks = async (req, res, next) => {
 exports.uploadTrack = async (req, res, next) => {
   try {
     let request = req.body.name;
-    console.log(req.file.buffer)
-    // Covert buffer to Readable Stream
+    console.log(req.file.buffer);
     const readableTrackStream = new Readable();
     readableTrackStream.push(req.file.buffer);
     readableTrackStream.push(null);
 
-    let bucket = new mongodb.GridFSBucket(db, {
-      bucketName: "tracks",
+    let bucket = new mongodb.GridFSBucket(mongoose.connection.db, {
+      bucketName: "track",
     });
 
     let uploadStream = bucket.openUploadStream(request);
@@ -69,35 +70,30 @@ exports.uploadTrack = async (req, res, next) => {
       });
     });
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };
 
 exports.getTrack = async (req, res, next) => {
-  try {
-    res.set("content-type", "audio/mp3");
-    res.set("accept-ranges", "bytes");
-
-    let bucket = new mongodb.GridFSBucket(db, {
-      bucketName: "tracks",
-    });
-
-    let downloadStream = bucket.openDownloadStream(req.params.trackID);
-
-    downloadStream.on("data", (chunk) => {
-      res.write(chunk);
-    });
-
-    downloadStream.on("error", () => {
-      res.sendStatus(404);
-    });
-
-    downloadStream.on("end", () => {
-      res.end();
-    });
-  } catch (err) {
-    next(err);
-  }
+  res.set("content-type", "audio/mp3");
+  res.set("accept-ranges", "bytes");
+  let bucket = new mongodb.GridFSBucket(mongoose.connection.db, {
+    bucketName: "track",
+  });
+  let downloadStream = bucket.openDownloadStream(req.params.trackID);
+  console.log(downloadStream)
+  downloadStream.on("data", (chunk) => {
+    res.write(chunk);
+  });
+  
+  downloadStream.on("error", () => {
+    res.sendStatus(404);
+  });
+  downloadStream.on("end", () => {
+    res.end();
+  });
+  console.log("here");
 };
 
 exports.updateTrack = async (req, res, next) => {
